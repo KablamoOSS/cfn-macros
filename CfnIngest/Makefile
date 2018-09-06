@@ -1,0 +1,25 @@
+GO_TRANSFORM_PKG = $(wildcard transform/*.go)
+GO_CLI_PKG = $(wildcard cli/*.go)
+GO_LAMBDA_PKG = $(wildcard lambda/*.go)
+
+NAME=cfn-ingest
+
+.PHONY: all
+all: ${NAME} ${NAME}.zip
+
+${NAME}.zip: handler
+	zip ${NAME}.zip handler
+
+handler: $(GO_LAMBDA_PKG) $(GO_TRANSFORM_PKG)
+	go build -o handler github.com/KablamoOSS/${NAME}/lambda 
+
+${NAME}: $(GO_CLI_PKG) $(GO_TRANSFORM_PKG)
+	go build -o ${NAME} github.com/KablamoOSS/${NAME}/cli 
+
+.PHONY: test
+test:
+	go test ./...
+
+.PHONY: clean
+clean:
+	rm -f handler ${NAME} ${NAME}.zip

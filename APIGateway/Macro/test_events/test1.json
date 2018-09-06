@@ -1,0 +1,48 @@
+{
+  "accountId": "123456789012",
+  "fragment": {
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Basic API - Lambda and Dynamodb using SAM",
+    "Globals": {
+      "Function": {
+        "Environment": {
+          "Variables": {
+            "STACKNAME": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        },
+        "MemorySize": 128,
+        "Runtime": "python3.6",
+        "Timeout": 5
+      }
+    },
+    "Resources": {
+      "Table": {
+        "Type": "AWS::Serverless::SimpleTable"
+      },
+      "ping": {
+        "Properties": {
+          "AutoPublishAlias": "dev",
+          "CodeUri": "s3://my.deployments/API/lambdas/1234567890abcdef1234567890abcdef",
+          "Events": {
+            "Endpoint": {
+              "Properties": {
+                "Method": "GET",
+                "Path": "/ping"
+              },
+              "Type": "Api"
+            }
+          },
+          "Handler": "ping.main"
+        },
+        "Type": "AWS::Serverless::Function"
+      }
+    }
+  },
+  "params": {},
+  "region": "ap-southeast-2",
+  "requestId": "3b0a9cf8-ac02-4c7b-afb8-c0886640833e",
+  "templateParameterValues": {},
+  "transformId": "123456789012::APIG-2018-08-18"
+}

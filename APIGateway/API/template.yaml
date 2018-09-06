@@ -1,0 +1,27 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: [APIG-2018-08-18, 'AWS::Serverless-2016-10-31']
+Description: Basic API - Lambda and Dynamodb using SAM
+Globals:
+  Function:
+    Runtime: python3.6
+    Timeout: 5
+    MemorySize: 128
+    Environment:
+      Variables:
+        STACKNAME: !Ref "AWS::StackName"
+Resources:
+  ping:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/
+      Handler: ping.main
+      AutoPublishAlias: dev
+      Events:
+        Endpoint:
+          Type: Api
+          Properties:
+            Path: /ping
+            Method: GET
+  Table:
+    Type: AWS::Serverless::SimpleTable

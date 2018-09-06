@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  TransformExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ['logs:*']
+                Resource: 'arn:aws:logs:*:*:*'
+  TransformFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import traceback
+          import json
+
+          def handler(event, context):
+
+              print(json.dumps(event))
+
+              macro_response = {
+                  "requestId": event["requestId"],
+                  "status": "success"
+              }
+              try:
+                  params = {
+                      "params": event["templateParameterValues"],
+                      "template": event["fragment"],
+                      "account_id": event["accountId"],
+                      "region": event["region"]
+                  }
+                  response = event["fragment"]
+                  for k in list(response["Resources"].keys()):
+                      if response["Resources"][k]["Type"] == "Kablamo::Databases::AuroraCluster":
+                          if "Properties" in response["Resources"][k]:
+                              if "Count" in response["Resources"][k]["Properties"]:
+                                  for i in range(1,int(response["Resources"][k]["Properties"]["Count"])+1):
+                                      response["Resources"][k + str(i)] = {
+                                          "Type": "AWS::RDS::DBInstance",
+                                          "Properties": {
+                                              "Engine": "aurora",
+                                              "DBClusterIdentifier": {
+                                                  "Ref": k
+                                              }
+                                          }
+                                      }
+                                      if "DBSubnetGroupName" in response["Resources"][k]["Properties"]:
+                                          response["Resources"][k + str(i)]["Properties"]["DBSubnetGroupName"] = response["Resources"][k]["Properties"]["DBSubnetGroupName"]
+                                      if "DBInstanceClass" in response["Resources"][k]["Properties"]:
+                                          response["Resources"][k + str(i)]["Properties"]["DBInstanceClass"] = response["Resources"][k]["Properties"]["DBInstanceClass"]
+                                          del response["Resources"][k]["Properties"]["DBInstanceClass"]
+                                      
+                                  del response["Resources"][k]["Properties"]["Count"]
+                          response["Resources"][k]["Type"] = "AWS::RDS::DBCluster"
+                          response["Resources"][k]["Properties"]["Engine"] = "aurora"
+                  macro_response["fragment"] = response
+              except Exception as e:
+                  traceback.print_exc()
+                  macro_response["status"] = "failure"
+                  macro_response["errorMessage"] = str(e)
+
+              print(json.dumps(macro_response))
+              return macro_response
+
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt TransformExecutionRole.Arn
+  TransformFunctionPermissions:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt TransformFunction.Arn
+      Principal: 'cloudformation.amazonaws.com'
+  Transform:
+    Type: AWS::CloudFormation::Transform
+    Properties:
+      Name: !Sub '${AWS::AccountId}::KablamoDatabasesPlugin'
+      Description: Protects S3 Buckets
+      RoutingTable:
+        '*': 0_1
+      Versions:
+        - VersionName: 0_1
+          Description: Version 0_1 of the KablamoDatabasesPlugin transform
+          FunctionName: !GetAtt TransformFunction.Arn
+      ExecutionPolicy:
+        Version: 2012-10-17
+        Id: AllowOtherAccountPolicy
+        Statement:
+          - Sid: AllowExecution
+            Effect: Allow
+            Principal: '*'
+            Action: 'cloudformation:CreateChangeSet'
+            Resource: !Sub 'arn:*:cloudformation:${AWS::Region}:${AWS::AccountId}:transform/KablamoDatabasesPlugin'

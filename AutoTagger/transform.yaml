@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  TransformFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.6
+      CodeUri: lambda
+      Handler: index.handler
+      Policies: CloudWatchFullAccess
+  TransformFunctionPermissions:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt TransformFunction.Arn
+      Principal: 'cloudformation.amazonaws.com'
+  Transform:
+    Type: AWS::CloudFormation::Transform
+    Properties:
+      Name: !Sub '${AWS::AccountId}::AutoTagger'
+      Description: Automatically tags resources
+      RoutingTable:
+        '*': 0_1
+      Versions:
+        - VersionName: 0_1
+          Description: Version 0_1 of the AutoTagger transform
+          FunctionName: !GetAtt TransformFunction.Arn
+      ExecutionPolicy:
+        Version: 2012-10-17
+        Id: AllowOtherAccountPolicy
+        Statement:
+          - Sid: AllowExecution
+            Effect: Allow
+            Principal: '*'
+            Action: 'cloudformation:CreateChangeSet'
+            Resource: !Sub 'arn:*:cloudformation:${AWS::Region}:${AWS::AccountId}:transform/AutoTagger'

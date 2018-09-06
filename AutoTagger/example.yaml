@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+  AddTags:
+  - Key: Department
+    Value: Finance
+    PropagateAtLaunch: true
+  - Key: BillingCode
+    Value: XYZ
+  - Key: NoValueTag
+  - Key: "something:with:colons"
+    Value: "to:test"
+Resources:
+  myUntaggedBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "myuntaggedbucket"
+Transform: "123456789012::AutoTagger"

@@ -1,0 +1,8 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  myAuroraCluster:
+    Type: "Kablamo::Databases::AuroraCluster"
+    Properties:
+      Count: 3
+      DBInstanceClass: "db.r3.xlarge"
+Transform: "123456789012::KablamoDatabasesPlugin"

@@ -1,0 +1,36 @@
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.6
+      CodeUri: lambda
+      Handler: transform.main
+  Macro:
+    Type: AWS::CloudFormation::Macro
+    Properties:
+      Name: APIG-2018-08-18
+      FunctionName: !GetAtt Function.Arn
+      LogGroupName: /macro/APIG
+      LogRoleARN: !GetAtt TransformExecutionRole.Arn
+  TransformExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ['logs:*']
+                Resource: 'arn:aws:logs:*:*:*'
+
