@@ -2,17 +2,25 @@ GO_TRANSFORM_PKG = $(wildcard transform/*.go)
 GO_CLI_PKG = $(wildcard cli/*.go)
 GO_LAMBDA_PKG = $(wildcard lambda/*.go)
 
-.PHONY: all
-all: nested-resources nested-resources.zip
+NAME=NestedResources
 
-nested-resources.zip: handler
-	zip nested-resources.zip handler
+.PHONY: all
+all: ${NAME} ${NAME}.zip
+
+.PHONY: lambda
+lambda: ${NAME}.zip
+
+${NAME}.zip: handler
+	zip ${NAME}.zip handler
 
 handler: $(GO_LAMBDA_PKG) $(GO_TRANSFORM_PKG)
-	go build -o handler github.com/KablamoOSS/nested-resources/lambda 
+	go build -o handler github.com/KablamoOSS/cfn-macros/${NAME}/lambda
 
-nested-resources: $(GO_CLI_PKG) $(GO_TRANSFORM_PKG)
-	go build -o nested-resources github.com/KablamoOSS/nested-resources/cli 
+.PHONY: cli
+cli: ${NAME}
+
+${NAME}: $(GO_CLI_PKG) $(GO_TRANSFORM_PKG)
+	go build -o ${NAME} github.com/KablamoOSS/cfn-macros/${NAME}/cli
 
 .PHONY: test
 test:
@@ -20,4 +28,4 @@ test:
 
 .PHONY: clean
 clean:
-	rm -f handler nested-resources nested-resources.zip
+	rm -f handler ${NAME} ${NAME}.zip

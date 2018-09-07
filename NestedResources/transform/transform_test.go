@@ -16,14 +16,21 @@ var sampleJson = `{
         "Device": "/dev/sda",
         "InstanceId": {
           "Name": "MyInstance",
+		  "Kind": "Resource",
           "Type": "AWS::EC2::Instance",
           "Properties": {}
         },
         "VolumeId": {
           "Name": "MyVolume",
+		  "Kind": "Resource",
           "Type": "AWS::EC2::Volume",
           "Properties": {
-            "Size": 100
+            "Size": {
+				"Name": "MyVolumeSize",
+				"Kind": "Parameter",
+				"Type": "Number",
+				"Default": 100
+			}
           }
         }
       }
@@ -39,6 +46,7 @@ func TestSimpleTransform(t *testing.T) {
 	assert.Nil(t, err)
 
 	transformed := Transform(templateObj)
+	assert.Len(t, transformed["Parameters"].(map[string]interface{}), 1)
 	assert.Len(t, transformed["Resources"].(map[string]interface{}), 3)
 }
 
@@ -52,12 +60,14 @@ var sampleWithArray = `{
         "Device": "/dev/sda",
         "InstanceId": {
           "Name": "MyInstance",
+		  "Kind": "Resource",
           "Type": "AWS::EC2::Instance",
           "Properties": {}
         },
         "VolumeIds": [
 		  {
             "Name": "MyVolume1",
+		    "Kind": "Resource",
             "Type": "AWS::EC2::Volume",
             "Properties": {
               "Size": 100
@@ -65,6 +75,7 @@ var sampleWithArray = `{
           },
 		  {
             "Name": "MyVolume2",
+		    "Kind": "Resource",
             "Type": "AWS::EC2::Volume",
             "Properties": {
               "Size": 100

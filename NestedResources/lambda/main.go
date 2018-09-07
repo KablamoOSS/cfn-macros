@@ -21,11 +21,6 @@ type MacroResponse struct {
 	Fragment  map[string]interface{} `json:"fragment"`
 }
 
-type Resource struct {
-	Type       string
-	Parameters map[string]interface{}
-}
-
 func main() {
 	lambda.Start(handleRequest)
 }
@@ -37,7 +32,7 @@ func handleRequest(req MacroRequest) (MacroResponse, error) {
 		Fragment:  make(map[string]interface{}),
 	}
 
-	resp.Fragment = transform.Transform(resp.Fragment)
+	resp.Fragment = transform.Transform(req.Fragment)
 
 	return resp, nil
 }
