@@ -3,9 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-
 	"github.com/KablamoOSS/cfn-macros/LocalTransform/transform"
+	"io/ioutil"
 )
 
 type ConfigFile map[string]ConfigEntry

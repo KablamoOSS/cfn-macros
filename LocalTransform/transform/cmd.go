@@ -1,19 +1,19 @@
 package transform
 
 import (
-	"os/exec"
 	"encoding/json"
+	"os/exec"
 )
 
 type cmdTransformation struct {
 	command string
-	args []string
+	args    []string
 }
 
 func (t *Transformer) RegisterCommand(name, cmd string, args ...string) {
 	newTransformation := &cmdTransformation{
 		command: cmd,
-		args: args,
+		args:    args,
 	}
 	if t.Transforms == nil {
 		t.Transforms = make(map[string]transformation)

@@ -1,21 +1,21 @@
 package transform
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
 )
 
-type lambdaTransformation struct  {
-	name string
+type lambdaTransformation struct {
+	name         string
 	functionName string
 }
 
 func (t *Transformer) RegisterLambda(name, functionName string) {
 	newTransformation := &lambdaTransformation{
-		name: name,
+		name:         name,
 		functionName: functionName,
 	}
 	if t.Transforms == nil {
@@ -29,12 +29,12 @@ func (t *lambdaTransformation) apply(tmpl map[string]interface{}) (map[string]in
 	client := lambda.New(sess)
 
 	inputTmpl := map[string]interface{}{
-		"region": "lambda",
-		"accountId": "lambda",
+		"region":      "lambda",
+		"accountId":   "lambda",
 		"transformId": t.name,
-		"fragment": tmpl,
-		"requestId": t.name,
-		"params": map[string]interface{}{},
+		"fragment":    tmpl,
+		"requestId":   t.name,
+		"params":      map[string]interface{}{},
 	}
 
 	input, err := json.Marshal(inputTmpl)
@@ -45,7 +45,7 @@ func (t *lambdaTransformation) apply(tmpl map[string]interface{}) (map[string]in
 	invokeOutput, err := client.Invoke(
 		&lambda.InvokeInput{
 			FunctionName: &t.functionName,
-			Payload: input,
+			Payload:      input,
 		},
 	)
 	if err != nil {

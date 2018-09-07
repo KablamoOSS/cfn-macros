@@ -1,22 +1,22 @@
 package transform
 
 import (
-	"fmt"
 	"archive/zip"
-	"io/ioutil"
+	"encoding/json"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
-	"encoding/json"
 	"path/filepath"
 )
 
 type dockerTransformation struct {
-	name string
-	image string // e.g. lambci/lambda
+	name    string
+	image   string // e.g. lambci/lambda
 	runtime string
 	handler string
-	file string
+	file    string
 }
 
 func (t *Transformer) RegisterDocker(name, runtime, handler, file string) {
@@ -25,11 +25,11 @@ func (t *Transformer) RegisterDocker(name, runtime, handler, file string) {
 	// TODO: Which (if any) AWS vars to pass through?
 
 	newTransformation := &dockerTransformation{
-		name: name,
-		image: "lambci/lambda", // FIXME: This is a sane default, but shouldn't be hardcoded.
+		name:    name,
+		image:   "lambci/lambda", // FIXME: This is a sane default, but shouldn't be hardcoded.
 		runtime: runtime,
 		handler: handler,
-		file: file,
+		file:    file,
 	}
 	if t.Transforms == nil {
 		t.Transforms = make(map[string]transformation)
@@ -66,7 +66,7 @@ func (d *dockerTransformation) apply(tmpl map[string]interface{}) (map[string]in
 			if err != nil {
 				return tmpl, err
 			}
-			dstFd, err := os.OpenFile(filepath.Join(tmpdir, f.Name), os.O_WRONLY | os.O_CREATE, 0755)
+			dstFd, err := os.OpenFile(filepath.Join(tmpdir, f.Name), os.O_WRONLY|os.O_CREATE, 0755)
 			if err != nil {
 				srcFd.Close()
 				return tmpl, err
@@ -107,12 +107,12 @@ func (d *dockerTransformation) runDockerCommand(tmpdir string, tmpl map[string]i
 
 	go func() {
 		input := map[string]interface{}{
-			"region": "docker",
-			"accountId": "docker",
+			"region":      "docker",
+			"accountId":   "docker",
 			"transformId": d.name,
-			"fragment": tmpl,
-			"requestId": tmpdir,
-			"params": map[string]interface{}{},
+			"fragment":    tmpl,
+			"requestId":   tmpdir,
+			"params":      map[string]interface{}{},
 		}
 		encoder := json.NewEncoder(writer)
 		encoder.Encode(input)

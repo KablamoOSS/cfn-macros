@@ -8,7 +8,7 @@ type Transformer struct {
 	Transforms map[string]transformation
 }
 
-type transformation interface{
+type transformation interface {
 	apply(map[string]interface{}) (map[string]interface{}, error)
 }
 
@@ -23,7 +23,6 @@ func (t *Transformer) Transform(tmpl map[string]interface{}) (map[string]interfa
 
 	switch s := transformsKey.(type) {
 	case string:
-		// fmt.Printf("Run transform: %s\n", s)
 		newTmpl, err := t.apply(s, tmpl)
 		if err != nil {
 			return tmpl, err
@@ -31,7 +30,6 @@ func (t *Transformer) Transform(tmpl map[string]interface{}) (map[string]interfa
 		tmpl = newTmpl
 	case []interface{}:
 		for _, sn := range s {
-			// fmt.Printf("Run transform: %s\n", sn.(string))
 			newTmpl, err := t.apply(sn.(string), tmpl)
 			if err != nil {
 				return tmpl, err
@@ -50,4 +48,3 @@ func (t *Transformer) apply(name string, tmpl map[string]interface{}) (map[strin
 	}
 	return transformer.apply(tmpl)
 }
-

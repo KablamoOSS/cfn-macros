@@ -1,4 +1,4 @@
-# cfn-transform
+# LocalTransform
 
 A tool for running CloudFormation Macro style transformations outside of a
 CloudFormation ChangeSet. Suitable for use in CI pipelines, or for testing
