@@ -1,11 +1,13 @@
-package ingest
+package transform
 
 import (
-	"io/ioutil"
 	"fmt"
-	"encoding/json"
 )
 
+// TODO: This makes parsing JSON templates a little simpler, but reduces
+// compatibility with other template transforms which might include additional
+// top level sections. Replacing this with a map[string]interface{} would solve
+// this, at the cost of making it a little more awkward to work with.
 type CfnTemplate struct {
 	Ingest     map[string]interface{} `json:"Ingest,omitempty"`
 	Transforms interface{}            `json:"Transform,omitempty"`
@@ -23,38 +25,6 @@ func getObject(node map[string]interface{}, key string) (map[string]interface{},
 		}
 	}
 	return nil, false
-}
-
-func NewTemplate(fragment map[string]interface{}) *CfnTemplate {
-	// FIXME: This currently silently ignores extra keys, or keys that aren't a
-	// json object
-	tmpl := &CfnTemplate{}
-
-	if ingest, ok := getObject(fragment, "Ingest"); ok {
-			tmpl.Ingest = ingest
-	}
-
-	if params, ok := getObject(fragment, "Parameters"); ok {
-			tmpl.Parameters = params
-	}
-
-	if mappings, ok := getObject(fragment, "Mappings"); ok {
-			tmpl.Mappings = mappings
-	}
-
-	if conditions, ok := getObject(fragment, "Conditions"); ok {
-			tmpl.Conditions = conditions
-	}
-
-	if resources, ok := getObject(fragment, "Resources"); ok {
-			tmpl.Resources = resources
-	}
-
-	if outputs, ok := getObject(fragment, "Outputs"); ok {
-			tmpl.Outputs = outputs
-	}
-
-	return tmpl
 }
 
 func (tmpl *CfnTemplate) Transform() error {
@@ -193,21 +163,6 @@ func (tmpl *CfnTemplate) SupplyParameter(paramName string, paramIface interface{
 	return nil
 }
 
-func GetPath(path string) (*CfnTemplate, error) {
-	body, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	tmpl := &CfnTemplate{}
-	err = json.Unmarshal(body, tmpl)
-	if err != nil {
-		return nil, err
-	}
-
-	return tmpl, nil
-}
-
 func inject(nodeIface interface{}, token, paramKey string, newValue interface{}) {
 	switch node := nodeIface.(type) {
 	case map[string]interface{}:
@@ -224,10 +179,8 @@ func inject(nodeIface interface{}, token, paramKey string, newValue interface{})
 		}
 	case []interface{}:
 		for i, v := range node {
-			// fmt.Printf("?? %#v\n", v)
 			m, isMap := v.(map[string]interface{})
 			if isMap {
-				fmt.Printf("map in array: %#v\n", m)
 				s, isString := m[token].(string)
 				if isString && len(m) == 1 && s == paramKey {
 					node[i] = newValue
@@ -238,5 +191,4 @@ func inject(nodeIface interface{}, token, paramKey string, newValue interface{})
 
 		}
 	}
-
 }

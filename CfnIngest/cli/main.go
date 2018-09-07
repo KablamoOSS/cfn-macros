@@ -3,9 +3,8 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"github.com/KablamoOSS/cfn-macros/CfnIngest/transform"
 	"os"
-
-	transform "github.com/KablamoOSS/cfn-macros/CfnIngest/transform"
 )
 
 func main() {

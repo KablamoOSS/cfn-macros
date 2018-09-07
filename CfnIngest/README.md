@@ -50,36 +50,20 @@ Resources:
       FunctionName: !Ref Function
 ```
 
+With the macro created, adding `Transform: CfnIngest` will apply the
+transformation to stacks you create.
+
 ## Local usage
 
-When running locally, `cfn-ingest <filename.json>` will print the generated file to stdout.
+When running locally, simply run the `cfn-ingest` command with the base template path as an argument:
 
-## Macro usage
+    cfn-ingest base-template.json
 
-With the macro created in your account, adding `Transform: CfnIngest` will
-apply the transformation to stacks you create.
+or:
 
-__Note:__ Cloudformation macros are not able to change the parameters section of the template. This means that when ingesting a template, all parameters must be covered by the ingestion. If you want parameters to be part of the final templates parameters, they will have to be wrapped explicitly:
+    cfn-ingest s3://my-bucket/base-template.json
 
-
-    {
-      "Parameters":{
-        "VolumeSize": {
-          "Type": "Number",
-          "DefaultValue": 100
-        },
-      },
-      "Ingest": {
-        "InstanceWithVolume": {
-          "Source": "instance-with-volume.json",
-          "Parameters": {
-            "VolumeSize": { "Ref": "VolumeSize" }
-          },
-          "IngestOutputs": true
-        }
-      },
-      ...
-    }
+Note: To use shared configuration from `~/.aws`, setting the environment variable `AWS_SDK_LOAD_CONFIG=1` may be required.
 
 ## (Badly contrived) Example
 

@@ -1,0 +1,35 @@
+{
+  "Ingest": {
+    "InstanceWithVolume": {
+      "Source": "instance-with-volume.json",
+      "Parameters": {
+        "SecurityGroup": { "Ref": "SecurityGroup" }
+      }
+    }
+  },
+  "Resources": {
+    "MySecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+      }
+    },
+    "MyRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Policy": {
+          "PolicyName": "ManageMyInstance",
+          "PolicyDocument": {
+            "Version" : "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "ec2:*",
+                "Resource": { "Fn::Join": [ "arn:aws:ec2:::instance/", { "Ingest::Ref": "InstanceWithVolume.InstanceId" } ] }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "Parameters":{
+    "VolumeSize": {
+      "Type": "Number",
+      "DefaultValue": 100
+    },
+    "SecurityGroup": {
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "MyVolumeAttachment": {
+      "Type": "AWS::EC2::VolumeAttachment",
+      "Properties": {
+        "Device": "/dev/sda",
+        "InstanceId": { "Ref": "MyInstance" },
+        "VolumeIds": [ { "Ref": "MyVolume" } ]
+      }
+    },
+    "MyInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "SecurityGroup": { "Ref": "SecurityGroup" }
+      }
+    },
+    "MyVolume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "Size": { "Ref": "VolumeSize" }
+      }
+    }
+  },
+  "Outputs":{
+    "InstanceId": {
+      "Value": { "Ref": "MyInstance" }
+    }
+  }
+}
