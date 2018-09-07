@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/KablamoOSS/cfn-brainfuck/transform"
+	"encoding/json"
+	"github.com/KablamoOSS/cfn-macros/CfnBrainfuck/transform"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -16,9 +17,9 @@ type MacroRequest struct {
 }
 
 type MacroResponse struct {
-	RequestID string                 `json:"requestId"`
-	Status    string                 `json:"status"`
-	Fragment  map[string]interface{} `json:"fragment"`
+	RequestID string      `json:"requestId"`
+	Status    string      `json:"status"`
+	Fragment  interface{} `json:"fragment"`
 }
 
 func main() {
@@ -32,7 +33,14 @@ func handleRequest(req MacroRequest) (MacroResponse, error) {
 		Fragment:  make(map[string]interface{}),
 	}
 
-	resp.Fragment = transform.Transform(req.Fragment)
+	fragment := make(map[string]interface{})
+	output := transform.Transform(req.Fragment)
+	err := json.Unmarshal(output, &fragment)
+	if err != nil {
+		resp.Fragment = string(output)
+	} else {
+		resp.Fragment = fragment
+	}
 
 	return resp, nil
 }

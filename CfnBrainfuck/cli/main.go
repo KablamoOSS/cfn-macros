@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	var compact bool
-	flag.BoolVar(&compact, "c", false, "Produce compact JSON output")
 	flag.Parse()
 
 	var err error
@@ -25,14 +23,14 @@ func main() {
 		}
 	}
 
-	err = apply(reader, os.Stdout, compact)
+	err = apply(reader, os.Stdout)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to apply transform: %v", err)
 		os.Exit(1)
 	}
 }
 
-func apply(in io.Reader, out io.Writer, compact bool) error {
+func apply(in io.Reader, out io.Writer) error {
 	inTmpl := make(map[string]interface{})
 
 	decoder := json.NewDecoder(in)
@@ -41,16 +39,8 @@ func apply(in io.Reader, out io.Writer, compact bool) error {
 		return err
 	}
 
-	outTmpl := transform.Transform(inTmpl)
-
-	encoder := json.NewEncoder(out)
-	if !compact {
-		encoder.SetIndent("", "  ")
-	}
-	err = encoder.Encode(outTmpl)
-	if err != nil {
-		return err
-	}
+	output := transform.Transform(inTmpl)
+	fmt.Print(string(output))
 
 	return nil
 }

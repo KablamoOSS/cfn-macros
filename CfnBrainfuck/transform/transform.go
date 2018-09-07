@@ -1,25 +1,12 @@
 package transform
 
-import (
-	"encoding/json"
-)
-
-func Transform(fragment map[string]interface{}) map[string]interface{} {
+func Transform(fragment map[string]interface{}) []byte {
 	code, ok := fragment["Brainfuck"]
-	if!ok {
-		return fragment
+	if !ok {
+		return []byte{}
 	}
 
-	output := runBrainfuck(code.(string))
-
-	outTmpl := make(map[string]interface{})
-
-	err := json.Unmarshal(output, &outTmpl)
-	if err != nil {
-		panic(err)
-	}
-
-	return outTmpl
+	return runBrainfuck(code.(string))
 }
 
 func runBrainfuck(code string) []byte {
