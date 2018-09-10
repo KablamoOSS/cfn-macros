@@ -421,10 +421,3 @@ def handler(event, context):
 
     print(json.dumps(macro_response))
     return macro_response
-
-if __name__ == '__main__':
-
-    event_file = '../test_events/event1.json'
-    with open(event_file, 'r') as f:
-        event = json.load(f)
-    handler(event, {})
