@@ -14,13 +14,6 @@ aws cloudformation package --template-file Transform/transform.yaml --s3-bucket 
 aws cloudformation deploy --capabilities CAPABILITY_IAM --template-file /tmp/packaged.yaml --stack-name VPCBuilder-macro
 ```
 
-## To Do
-
-Add Outputs with Exports for critical resources
-VPC Endpoints for all AWS Services
-Add a little better handling of custom pieces (e.g. different route gateways)
-Adding proper IPv6 regex and handling with NetworkACLs
-
 ## Basic Usage
 
 Utilise the yaml structure below in the [template](VPC/example.yaml). It will support the removal of Subnets, RouteTables, NATGateways and NetworkACLs.
@@ -31,4 +24,12 @@ aws cloudformation deploy --capabilities CAPABILITY_IAM \
         --stack-name VPC \
         --parameter-overrides VGW=vgw-030ba2b7b2c0ce5d5
 ```
+
+## To Do
+
+- Explaination about dependencies (VGW)
+- Add Outputs with Exports for critical resources
+- VPC Endpoints for all AWS Services
+- Add a little better handling of custom pieces (e.g. different route gateways)
+- Adding proper IPv6 regex and handling with NetworkACLs
 
