@@ -29,6 +29,7 @@ def handler(event, context):
             "region": event["region"]
         }
         resources = {}
+        outputs = {}
         response = event["fragment"]
         for k in list(response["Resources"].keys()):
             if response["Resources"][k]["Type"] == "Kablamo::Network::VPC":
@@ -50,6 +51,18 @@ def handler(event, context):
                         }
                     }
 
+                    outputs[properties["Details"]["VPCName"]] = {
+                        "Description": properties["Details"]["VPCName"],
+                        "Value": { 
+                            "Ref" : properties["Details"]["VPCName"] 
+                        },
+                        "Export" : { 
+                            "Name" : {
+                                "Fn::Sub": "${AWS::StackName}-VPCid" 
+                            }
+                        }
+                    }
+
                     if "IPv6" in properties["Details"]:
                         if properties["Details"]["IPv6"]:
                             resources["IPv6Block"] = {
@@ -67,6 +80,18 @@ def handler(event, context):
                                 "Properties": {
                                     "VpcId": {
                                         "Ref": properties["Details"]["VPCName"]
+                                    }
+                                }
+                            }
+
+                            outputs[properties["Details"]["VPCName"]+"Ipv6CidrBlocks"] = {
+                                "Description": properties["Details"]["VPCName"] + " Ipv6CidrBlocks",
+                                "Value": { 
+                                    "Fn::GetAtt" : [properties["Details"]["VPCName"], "Ipv6CidrBlocks"]  
+                                },
+                                "Export" : { 
+                                    "Name" : {
+                                        "Fn::Sub": "${AWS::StackName}-VPC-Ipv6CidrBlocks" 
                                     }
                                 }
                             }
@@ -204,6 +229,18 @@ def handler(event, context):
                                 }
                             }
 
+                            outputs[routetable] = {
+                                "Description": routetable,
+                                "Value": { 
+                                    "Ref" : routetable 
+                                },
+                                "Export" : { 
+                                    "Name" : {
+                                        "Fn::Sub": "${AWS::StackName}-RouteTable-"+routetable 
+                                    }
+                                }
+                            }
+
                             resources[routetable + "RoutePropagation"] = {
                                 "Type": "AWS::EC2::VPNGatewayRoutePropagation",
                                 "Properties": {
@@ -258,6 +295,18 @@ def handler(event, context):
                                     ],
                                     "VpcId": {
                                         "Ref": properties["Details"]["VPCName"]
+                                    }
+                                }
+                            }
+
+                            outputs[subnet] = {
+                                "Description": subnet,
+                                "Value": { 
+                                    "Ref" : subnet 
+                                },
+                                "Export" : { 
+                                    "Name" : {
+                                        "Fn::Sub": "${AWS::StackName}-Subnet-" + subnet
                                     }
                                 }
                             }
@@ -412,7 +461,8 @@ def handler(event, context):
                                     }
                                 
 
-        response["Resources"] = resources 
+        response["Resources"] = resources
+        response["Outputs"] = outputs
         macro_response["fragment"] = response
     except Exception as e:
         traceback.print_exc()
