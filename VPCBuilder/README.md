@@ -24,8 +24,18 @@ Adding proper IPv6 regex and handling with NetworkACLs
 
 ## Basic Usage
 
-Utilise the yaml structure below e a template, changing the Account ID in the transformation definiton.
+Utilise the yaml structure below as a template, changing the Account ID in the transformation definiton.
 It will support the removal of Subnets, RouteTables, NATGateways and NetworkACLs.
+
+## Virtual Private Gateway
+
+Ideally you should never spin up a VPGW in Cloudformation. If you ever plan to attach it to a Direct Connect Virtual Interface you wont be able to tear up & down the VPC without destorying the VIF attachment. Either by hand in the console (shudder) or ideally via the CLI/SDK call with the following 
+
+```yaml
+Command: aws ec2 create-vpn-gateway --type ipsec.1 --amazon-side-asn <AWS BGP ASN>
+```
+
+You can omit the AWS BGP ASN if you're not sure what you would like to make it and can happily utilise the standard ASN provided by AWS.
 
 ## Network ACL Breakdown
 
