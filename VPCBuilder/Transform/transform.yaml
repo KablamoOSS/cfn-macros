@@ -1,7 +1,4 @@
-AWSTemplateFormatVersion: 2010-09-09
-Parameters:
-  LambdaBucket: {Description: Lambda Bucket Location, Type: String, Default: yourbucket.lambda.functions}
-  LambdaVersion: {Description: Lambda Bucket Location, Type: String, Default: release-tag}
+Transform: AWS::Serverless-2016-10-31
 Resources:
   VPCTransformExecutionRole:
     Type: AWS::IAM::Role
@@ -23,20 +20,13 @@ Resources:
                 Action: ['logs:*']
                 Resource: 'arn:aws:logs:*:*:*'
   VPCTransformFunction:
-    Type: AWS::Lambda::Function
+    Type: AWS::Serverless::Function
     Properties:
-      Code:
-        S3Bucket: !Sub '${LambdaBucket}'
-        S3Key: !Sub 'vpcbuilder/vpcbuilder-${LambdaVersion}.zip'
+      Runtime: python3.6
+      CodeUri: src
       Handler: index.handler
       Runtime: python2.7
       Role: !GetAtt VPCTransformExecutionRole.Arn
-  VPCTransformFunctionPermissions:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: 'lambda:InvokeFunction'
-      FunctionName: !GetAtt VPCTransformFunction.Arn
-      Principal: 'cloudformation.amazonaws.com'
   VPCTransform:
     Type: AWS::CloudFormation::Transform
     Properties:

@@ -2,18 +2,17 @@
 
 Builds out a "fully" featured VPC summarising the complexity associated with a VPC such as Internet & Customer Gateways, Subnets, Routetables and NATGateways.
 
-It also adds in VPC Flowlogs with an IAM role and supports full dynamic allocation of IPv6 with the VPC and to each subnet. 
+It also adds in VPC Flowlogs with an IAM role and supports full dynamic allocation of IPv6 with the VPC and to each subnet.
 
 The IPv6 handles Egress Internet Gateway and default route against ::/0
 
-## Build Package
+## Deploying the Transform
 
-make buildPackage
-
-## Upload package to S3
-Fill in your bucket and profile (utilises a crud aws cli s3 upload command)
-
-make uploadToS3
+```
+ARTIFACT_BUCKET=<your_s3_bucket>
+aws cloudformation package --template-file Transform/transform.yaml --s3-bucket $ARTIFACT_BUCKET --s3-prefix macros/VPCBuilder  --output-template /tmp/packaged.yaml
+aws cloudformation deploy --capabilities CAPABILITY_IAM --template-file /tmp/packaged.yaml --stack-name VPCBuilder-macro
+```
 
 ## To Do
 
@@ -41,7 +40,7 @@ Resources:
         Properties:
             CIDR: 172.16.0.0/20
             Details: {VPCName: PRIVATEEGRESSVPC, VPCDesc: Private Egress VPC, Region: ap-southeast-2, IPv6: True}
-            Tags: {Name: PRIVATE-EGRESS-VPC, Template: VPC for private endpoints egress only}            
+            Tags: {Name: PRIVATE-EGRESS-VPC, Template: VPC for private endpoints egress only}
             DHCP: {Name: DhcpOptions, DNSServers: 172.16.0.2, NTPServers: 169.254.169.123, NTBType: 2}
             Subnets:
                 ReservedMgmt1: {CIDR: 172.16.0.0/26, AZ: 0, NetACL: InternalSubnetAcl, RouteTable: InternalRT1 }
@@ -75,7 +74,7 @@ Resources:
                 NATGW3:
                     {Subnet: ReservedNet3, Routetable: InternalRT3}
             NetworkACLs:
-                RestrictedSubnetAcl: 
+                RestrictedSubnetAcl:
                     RestrictedSubnetAclEntryInTCPUnReserved: "90,6,allow,false,0.0.0.0/0,1024,65535"
                     RestrictedSubnetAclEntryInUDPUnReserved: "91,17,allow,false,0.0.0.0/0,1024,65535"
                     RestrictedSubnetAclEntryInTCPUnReservedIPv6: "92,6,allow,false,::/0,1024,65535"
