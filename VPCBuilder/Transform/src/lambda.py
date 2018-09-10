@@ -61,7 +61,7 @@ def handler(event, context):
                                     "AmazonProvidedIpv6CidrBlock": "true"
                                 }
                             }
-                        
+
                             resources["EgressGateway"] = {
                                 "Type": "AWS::EC2::EgressOnlyInternetGateway",
                                 "Properties": {
@@ -175,11 +175,11 @@ def handler(event, context):
                     resources["VPCFlowLogs"] = {
                         "Type" : "AWS::EC2::FlowLog",
                         "Properties" : {
-                            "DeliverLogsPermissionArn" : { 
-                                "Fn::GetAtt" : ["VPCFlowLogsRole", "Arn"] 
+                            "DeliverLogsPermissionArn" : {
+                                "Fn::GetAtt" : ["VPCFlowLogsRole", "Arn"]
                             },
                             "LogGroupName" : "FlowLogsGroup",
-                            "ResourceId" : { 
+                            "ResourceId" : {
                                 "Ref" : properties["Details"]["VPCName"]
                             },
                             "ResourceType" : "VPC",
@@ -292,31 +292,31 @@ def handler(event, context):
                                 if properties["Details"]["IPv6"]:
                                     resources[subnet]["DependsOn"] = "IPv6Block"
                                     resources[subnet]["Properties"]["AssignIpv6AddressOnCreation"] = True
-                                    resources[subnet]["Properties"]["Ipv6CidrBlock"] = { 
-                                        "Fn::Select": [ 
-                                            subnet_itr, 
-                                            { 
+                                    resources[subnet]["Properties"]["Ipv6CidrBlock"] = {
+                                        "Fn::Select": [
+                                            subnet_itr,
+                                            {
                                                 "Fn::Cidr": [
-                                                    { 
+                                                    {
                                                         "Fn::Select": [
-                                                            0, 
-                                                            { 
-                                                                "Fn::GetAtt": [ 
+                                                            0,
+                                                            {
+                                                                "Fn::GetAtt": [
                                                                     properties["Details"]["VPCName"],
-                                                                    "Ipv6CidrBlocks" 
+                                                                    "Ipv6CidrBlocks"
                                                                 ]
                                                             }
                                                         ]
-                                                    }, 
-                                                subnet_count, 
+                                                    },
+                                                subnet_count,
                                                 64
                                                 ]
                                             }
                                         ]
                                     }
                                     subnet_itr = subnet_itr +1
-                                    
-                    
+
+
                     if "NetworkACLs" in properties:
                         for networkacl, objects in properties["NetworkACLs"].iteritems():
                             resources[networkacl] = {
@@ -362,7 +362,7 @@ def handler(event, context):
                                     "Domain": "vpc"
                                 }
                             }
-                            
+
                             resources[natgw] = {
                                 "Type": "AWS::EC2::NatGateway",
                                 "Properties": {
@@ -383,7 +383,7 @@ def handler(event, context):
                                     ]
                                 }
                             }
-                            
+
                             resources["Route"+natgw] = {
                                 "Type": "AWS::EC2::Route",
                                 "Properties": {
@@ -410,9 +410,9 @@ def handler(event, context):
                                             }
                                         }
                                     }
-                                
 
-        response["Resources"] = resources 
+
+        response["Resources"] = resources
         macro_response["fragment"] = response
     except Exception as e:
         traceback.print_exc()
@@ -421,3 +421,10 @@ def handler(event, context):
 
     print(json.dumps(macro_response))
     return macro_response
+
+if __name__ == '__main__':
+
+    event_file = '../test_events/event1.json'
+    with open(event_file, 'r') as f:
+        event = json.load(f)
+    handler(event, {})
