@@ -11,3 +11,4 @@ Below are some example CloudFormation Macros developed by Kablamo.
 - [*Multi-Bucket Plugin*](https://github.com/KablamoOSS/cfn-macros/blob/master/MultiBucket/) - A template-level transform that allows a custom number of S3 Buckets be provisioned by prefix from one custom type
 - [*Nested Resources*](https://github.com/KablamoOSS/cfn-macros/blob/master/NestedResources/) - Reduces the reference complexity of CloudFormation templates by allowing single-use child resources to be embedded into parameter lists
 - [*Protect My S3 Transform*](https://github.com/KablamoOSS/cfn-macros/blob/master/ProtectMyS3/) - A template-level transform that allows a custom number of S3 Buckets be provisioned by prefix from one custom type
+- [*VPC Builder*](https://github.com/KablamoOSS/cfn-macros/blob/master/VPCBuilder/) - Builds out a VPC, Flowlogs, Subnets, Routetables, NATGateways. Includes support for IPv6.

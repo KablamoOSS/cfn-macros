@@ -1,7 +1,7 @@
 {
     "transformId": "167464700695::VPC",
     "templateParameterValues": {
-        "VGW": "vgw-0c003e11"
+        "VGW": "vgw-a1b2c3d4"
     },
     "fragment": {
         "AWSTemplateFormatVersion": "2010-09-09",

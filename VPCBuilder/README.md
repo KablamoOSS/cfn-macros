@@ -11,7 +11,7 @@ The IPv6 handles Egress Internet Gateway and default route against ::/0
 make buildPackage
 
 ## Upload package to S3
-Fill in your bucket and profile (utilises a crud aws cli s3 upload command)
+Fill in your bucket and profile (utilises a crude aws cli s3 upload command)
 
 make uploadToS3
 
@@ -27,6 +27,11 @@ Adding proper IPv6 regex and handling with NetworkACLs
 Utilise the yaml structure below e a template, changing the Account ID in the transformation definiton.
 It will support the removal of Subnets, RouteTables, NATGateways and NetworkACLs.
 
+## Network ACL Breakdown
+
+```yaml
+RuleName: "rule_number,protocol_number,[allow|deny],egress[true|false],cidr[0-255.0-255.0-255.0-255/0-32],from_port,to_port"
+```
 
 ```yaml
 AWSTemplateFormatVersion: 2010-09-09
