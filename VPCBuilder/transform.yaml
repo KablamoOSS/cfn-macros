@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  LambdaBucket: {Description: Lambda Bucket Location, Type: String, Default: yourbucket.lambda.functions}
+  LambdaVersion: {Description: Lambda Bucket Location, Type: String, Default: release-tag}
+Resources:
+  VPCTransformExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ['logs:*']
+                Resource: 'arn:aws:logs:*:*:*'
+  VPCTransformFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Sub '${LambdaBucket}'
+        S3Key: !Sub 'vpcbuilder/vpcbuilder-${LambdaVersion}.zip'
+      Handler: index.handler
+      Runtime: python2.7
+      Role: !GetAtt VPCTransformExecutionRole.Arn
+  VPCTransformFunctionPermissions:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt VPCTransformFunction.Arn
+      Principal: 'cloudformation.amazonaws.com'
+  VPCTransform:
+    Type: AWS::CloudFormation::Transform
+    Properties:
+      Name: !Sub '${AWS::AccountId}::VPC'
+      Description: Create VPC transforms
+      RoutingTable:
+        '*': 0_1
+      Versions:
+        - VersionName: 0_1
+          Description: Version 0_1 of the VPC transform
+          FunctionName: !GetAtt VPCTransformFunction.Arn
+      ExecutionPolicy:
+        Version: 2012-10-17
+        Id: AllowOtherAccountPolicy
+        Statement:
+          - Sid: AllowExecution
+            Effect: Allow
+            Principal: '*'
+            Action: 'cloudformation:CreateChangeSet'
+            Resource: !Sub 'arn:*:cloudformation:${AWS::Region}:${AWS::AccountId}:transform/VPC'
